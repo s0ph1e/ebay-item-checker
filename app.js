@@ -99,4 +99,5 @@ function checkAllItems(){
   }
 }  
 
+checkAllItems();
 setInterval(checkAllItems, config.delay);
