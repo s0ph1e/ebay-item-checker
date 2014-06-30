@@ -3,14 +3,40 @@ var url = require('url'),
   request = require('request'),
   config = require('./config.js'),
   nodemailer = require('nodemailer'),
-  smtpTransport = nodemailer.createTransport('SMTP', config.mail);
+  smtpTransport = nodemailer.createTransport('SMTP', config.mail),
+  NodeCache = require('node-cache'),
+  cache = new NodeCache({stdTTL: config.sameItemDelay});
   
-function compare(a,b) {
-  if (a.total < b.total)
+function isEmptyObject(obj) {
+  return !Object.keys(obj).length;
+}
+  
+function compare(a,b){
+  if(a.total < b.total){
      return -1;
-  if (a.total > b.total)
+  } else if(a.total > b.total){
     return 1;
-  return 0;
+  } else {
+    return 0;
+  }
+}
+
+function filter(price){
+  return function(obj) {
+    if(obj.total > price){
+      return false;
+    } else {
+      var cached = cache.get(obj.url);
+      
+      if(isEmptyObject(cached)){
+        cache.set(obj.url);
+        return true;
+      } else {
+        console.log(obj.url + ' cached');
+        return false;
+      }
+    }
+  }
 }
 
 function createEmail(items){
@@ -36,12 +62,14 @@ function parsePrices(html){
       priceBlock = $(this).find('td.prc'),
       url = nameBlock.attr('href'),
       name = nameBlock.text(),
-      price = priceBlock.find('.g-b[itemprop="price"]').text().match(priceRegexp) || 0,
-      shipping = priceBlock.find('.ship .fee').text().match(priceRegexp) || 0;
+      price = priceBlock.find('.g-b[itemprop="price"]').text().match(priceRegexp),
+      shipping = priceBlock.find('.ship .fee').text().match(priceRegexp);
      
     // Convert price and shipping to float
-    price = Number(Number(price[0]).toFixed(2));
-    shipping = Number(Number(shipping[0]).toFixed(2));
+    price = price ? price[0] : 0;
+    price = Number(Number(price).toFixed(2));
+    shipping = shipping ? shipping[0] : 0;
+    shipping = Number(Number(shipping).toFixed(2));
     total = price + shipping;
     total = Number(total.toFixed(2));
 
@@ -51,7 +79,7 @@ function parsePrices(html){
       price: price, 
       ship: shipping,
       total: total
-    });    
+    });
   });
   
   return results;
@@ -59,13 +87,8 @@ function parsePrices(html){
 
 function checkPrices(item, results){
 
-  var itemsFound = [];
-  
-  for(var i = 0, len = results.length; i < len; i++){ 
-    if(results[i].total < item.price){
-      itemsFound.push(results[i]);
-    }
-  }
+  // get item with wanted price which are not cached
+  var itemsFound = results.filter(filter(item.price));
   
   if(itemsFound.length > 0){
     smtpTransport.sendMail({
@@ -100,4 +123,4 @@ function checkAllItems(){
 }  
 
 checkAllItems();
-setInterval(checkAllItems, config.delay);
+setInterval(checkAllItems, config.delay * 1000);
