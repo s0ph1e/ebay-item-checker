@@ -1,9 +1,15 @@
 var config = {
   // Email for notifications
-  email: 'user@gmail.com,user@gmail.com',
+  email: 'user@gmail.com, user@gmail.com',
   
-  // Delay between checks
-  delay: 60000,
+  // Delay between checks in seconds
+  // Default 3600 = each hour
+  delay: 3600,
+  
+  // Delay between the notifications of the same item in seconds
+  // Default 43200 = twice a day
+  // 0 = never notify
+  sameItemDelay: 43200,
   
   // Array of items to check
   items: [
