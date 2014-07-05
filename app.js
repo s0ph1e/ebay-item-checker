@@ -52,7 +52,7 @@ function createEmail(items){
 function parsePrices(html){
   var $ = cheerio.load(html)
     resultContainer = '#ResultSetItems',
-    priceRegexp = /\d+[.]\d{2}/,
+    priceRegexp = /(\d{1,3},)*\d+\.\d{2}/,
     results = [];
   
   // Loop over all items on page
@@ -67,9 +67,13 @@ function parsePrices(html){
      
     // Convert price and shipping to float
     price = price ? price[0] : 0;
+    price = price.replace(',', '')
     price = Number(Number(price).toFixed(2));
+    
     shipping = shipping ? shipping[0] : 0;
+    shipping = shipping.replace(',', '')
     shipping = Number(Number(shipping).toFixed(2));
+    
     total = price + shipping;
     total = Number(total.toFixed(2));
 
