@@ -95,8 +95,17 @@ function checkPrices(item, results){
   var itemsFound = results.filter(filter(item.price));
   
   if(itemsFound.length > 0){
+
+    // Email addresses for send notifications
+    emailTo = config.email;
+
+    // Add item emails if specified
+    if (typeof(item.email) != 'undefined'){
+      emailTo += ',' + item.email;
+    }
+
     smtpTransport.sendMail({
-       to: config.email, 
+       to: emailTo, 
        subject: item.name + ' $' + itemsFound[0].total,
        html: createEmail(itemsFound),
     }, function(error, response){
