@@ -66,12 +66,12 @@ function parsePrices(html){
       shipping = priceBlock.find('.ship .fee').text().match(priceRegexp);
      
     // Convert price and shipping to float
-    price = price ? price[0] : 0;
-    price = price.replace(',', '')
+    price = price ? price[0] : '0';
+    price = price.replace(',', '');
     price = Number(Number(price).toFixed(2));
     
-    shipping = shipping ? shipping[0] : 0;
-    shipping = shipping.replace(',', '')
+    shipping = shipping ? shipping[0] : '0';
+    shipping = shipping.replace(',', '');
     shipping = Number(Number(shipping).toFixed(2));
     
     total = price + shipping;
