@@ -26,6 +26,10 @@ var config = {
       
       // Search items which cost low then specified price
       price: 350,
+
+      // Email for notification only about this item
+      // Uncomment this line, if you want get notification only about this item
+      //email: 'gopro-only@gmail.com',
     }
   ],
   
