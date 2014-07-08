@@ -59,20 +59,45 @@ function parsePrices(html){
   $('table', resultContainer).each(function(){
   
     var nameBlock = $(this).find('td.dtl').find('.ittl h3 a'),
-      priceBlock = $(this).find('td.prc'),
+      totalPriceBlock = $(this).find('td.prc'),
+      itemPriceBlock = totalPriceBlock.find('.g-b[itemprop="price"]'),
+      shippingBlock = totalPriceBlock.find('.ship'),
       url = nameBlock.attr('href'),
       name = nameBlock.text(),
-      price = priceBlock.find('.g-b[itemprop="price"]').text().match(priceRegexp),
-      shipping = priceBlock.find('.ship .fee').text().match(priceRegexp);
-     
-    // Convert price and shipping to float
-    price = price ? price[0] : '0';
-    price = price.replace(',', '');
-    price = Number(Number(price).toFixed(2));
+      price,
+      shipping;
     
-    shipping = shipping ? shipping[0] : '0';
-    shipping = shipping.replace(',', '');
-    shipping = Number(Number(shipping).toFixed(2));
+    // Extract price
+    if(itemPriceBlock.length){
+    
+      price = itemPriceBlock.text();
+      price = price.match(priceRegexp)[0].replace(',', '');
+      price = Number(Number(price).toFixed(2));
+
+    }
+    
+    // Detect if shipping is set
+    if(shippingBlock.find('.fee').length){      // Shipping price is set
+    
+      shipping = shippingBlock.find('.fee').text();  
+      shipping = shipping.match(priceRegexp)[0].replace(',', '');
+      shipping = Number(Number(shipping).toFixed(2));
+      
+    } else if(shippingBlock.find('span .gfsp').length){  // Free shipping
+    
+      shipping = 0;
+      
+    } else if(shippingBlock.html().indexOf('not specified')){ // Not specified
+    
+      console.log(url + ' shipping not specified');
+      return; 
+   
+   }
+    
+    if(!(typeof price == 'number' && typeof shipping == 'number')){
+      console.log(url + 'something wrong with price or shipping');
+      return;
+    }
     
     total = price + shipping;
     total = Number(total.toFixed(2));
