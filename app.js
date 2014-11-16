@@ -5,7 +5,7 @@ var nodemailer = require('nodemailer');
 var NodeCache = require('node-cache');
 var _ = require('lodash');
 
-var config = require('./config2.js');
+var config = require('./config.js');
 var smtpTransport = nodemailer.createTransport('SMTP', config.mail);
 var cache = new NodeCache({stdTTL: config.sameItemDelay});
 
