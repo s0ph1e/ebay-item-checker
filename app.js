@@ -39,7 +39,7 @@ function sendEmail(item, results) {
 
 function parsePrices(html) {
   var $ = cheerio.load(html);
-  var resultContainer = '#ListViewInner';
+  var resultContainer = '#ResultSetItems #ListViewInner';
   var priceRegexp = /(\d{1,3},)*\d+\.\d{2}/;
   var results = [];
 
